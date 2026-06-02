@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #1a1209;
+  color: #f0e6d3;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Logical spacing so RTL mirrors automatically */
+* {
+  box-sizing: border-box;
+}
+
+/* MapLibre controls on dark theme */
+.maplibregl-popup-content {
+  background: #2a1f0e !important;
+  color: #f0e6d3 !important;
+  border: 1px solid #4a3520;
+  border-radius: 12px;
+}
+.maplibregl-popup-tip {
+  border-top-color: #2a1f0e !important;
+  border-bottom-color: #2a1f0e !important;
+}
+.maplibregl-ctrl-group {
+  background: #2a1f0e !important;
+}
+
+/* Hide scrollbars on horizontal chip rows */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Onboarding tour (driver.js) — dark theme to match the app */
+.driver-popover {
+  background-color: #2a1f0e;
+  color: #f0e6d3;
+  border: 1px solid #4a3520;
+  border-radius: 14px;
+  max-width: 320px;
+}
+.driver-popover-title {
+  color: #f0e6d3;
+  font-size: 16px;
+}
+.driver-popover-description {
+  color: #a08060;
+  line-height: 1.5;
+}
+.driver-popover-progress-text { color: #605040; }
+.driver-popover-arrow { border-color: #2a1f0e; }
+.driver-popover-navigation-btns button,
+.driver-popover-close-btn {
+  background-color: #1a1209;
+  color: #f0e6d3;
+  border: 1px solid #4a3520;
+  border-radius: 8px;
+  text-shadow: none;
+}
+.driver-popover-navigation-btns button:hover { background-color: #3a2a14; }
+.driver-popover-next-btn {
+  background-color: #c8860a !important;
+  color: #fff !important;
+  border-color: #c8860a !important;
+}
+
+/* Print / Save-as-PDF: hide app chrome and render the report on white paper */
+@media print {
+  .no-print { display: none !important; }
+  html, body { background: #fff !important; color: #000 !important; }
+  .report-area { color: #000 !important; }
+  .report-area * { color: #000 !important; border-color: #ccc !important; }
+  .report-area table { width: 100%; border-collapse: collapse; }
+  .report-area th, .report-area td {
+    border: 1px solid #ccc !important; padding: 4px 8px; font-size: 11px; text-align: left;
+  }
+  .report-area thead { background: #f0f0f0 !important; }
+  @page { margin: 14mm; }
+}
