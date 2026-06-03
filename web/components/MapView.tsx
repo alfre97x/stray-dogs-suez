@@ -12,7 +12,7 @@ import { Colors, URGENCY_CONFIG, dogMarkerColor } from "@/lib/theme";
 import { SUEZ_CENTER, ZONES, zoneById } from "@/lib/zones";
 import { ZONE_BOUNDARIES } from "@/lib/zoneBoundaries";
 
-type Filter = "all" | "tnr" | "needs_tnr" | "injured";
+type Filter = "all" | "tnr" | "needs_tnr" | "pending" | "injured";
 
 const OSM_STYLE = {
   version: 8 as const,
@@ -112,7 +112,8 @@ export default function MapView({ onAddDog }: { onAddDog: () => void }) {
       const filtered = dogs.filter((d) => {
         if (d.is_deceased) return false;
         if (filter === "tnr") return d.tnr_done;
-        if (filter === "needs_tnr") return !d.tnr_done;
+        if (filter === "needs_tnr") return !d.tnr_done && !d.tnr_pending;
+        if (filter === "pending") return d.tnr_pending && !d.tnr_done;
         if (filter === "injured") return d.is_injured;
         return true;
       });
@@ -188,10 +189,11 @@ export default function MapView({ onAddDog }: { onAddDog: () => void }) {
     return () => { active = false; };
   }, [showZones, ready, lang]);
 
-  const filters: Filter[] = ["all", "needs_tnr", "tnr", "injured"];
+  const filters: Filter[] = ["all", "needs_tnr", "pending", "tnr", "injured"];
   const filterLabel: Record<Filter, string> = {
     all: t("filter_all"),
     needs_tnr: t("filter_needs_tnr"),
+    pending: t("filter_pending"),
     tnr: t("filter_tnr"),
     injured: t("filter_injured"),
   };
@@ -232,6 +234,7 @@ export default function MapView({ onAddDog }: { onAddDog: () => void }) {
         {[
           [Colors.success, t("legend_tnr_vacc")],
           [Colors.info, t("legend_tnr")],
+          [Colors.pending, t("legend_pending")],
           [Colors.primary, t("legend_not_tnr")],
           [Colors.danger, t("legend_injured")],
         ].map(([c, label]) => (

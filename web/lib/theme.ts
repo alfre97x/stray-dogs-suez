@@ -7,6 +7,7 @@ export const Colors = {
   info: "#4A90D0",
   warning: "#E8A020",
   danger: "#E84040",
+  pending: "#A06CD5",
   background: "#1A1209",
   surface: "#2A1F0E",
   border: "#4A3520",
@@ -22,13 +23,16 @@ export const URGENCY_CONFIG = {
   critical: { color: "#FF2020", emoji: "🚨" },
 } as const;
 
-// Marker color for a dog by its TNR / vaccination / injury status.
+// Marker color for a dog by its status. Order matters: injured (urgent) first,
+// then in-progress catching (pending), then TNR/vaccination state.
 export function dogMarkerColor(d: {
   is_injured: boolean;
   tnr_done: boolean;
+  tnr_pending?: boolean;
   vaccinated: boolean;
 }): string {
   if (d.is_injured) return Colors.danger;
+  if (d.tnr_pending && !d.tnr_done) return Colors.pending;
   if (d.tnr_done && d.vaccinated) return Colors.success;
   if (d.tnr_done) return Colors.info;
   return Colors.primary;

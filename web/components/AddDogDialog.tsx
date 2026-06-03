@@ -26,6 +26,7 @@ export default function AddDogDialog({ dog, onClose }: { dog?: Dog | null; onClo
   const [ageKey, setAgeKey] = useState<string>(dog?.estimated_age ?? "");
   const [color, setColor] = useState(dog?.color ?? "");
   const [tnr, setTnr] = useState(dog?.tnr_done ?? false);
+  const [pending, setPending] = useState(dog?.tnr_pending ?? false);
   const [vacc, setVacc] = useState(dog?.vaccinated ?? false);
   const [injured, setInjured] = useState(dog?.is_injured ?? false);
   const [notes, setNotes] = useState(dog?.notes ?? "");
@@ -89,6 +90,7 @@ export default function AddDogDialog({ dog, onClose }: { dog?: Dog | null; onClo
         lat: finalLoc.lat,
         lng: finalLoc.lng,
         tnr_done: tnr,
+        tnr_pending: pending && !tnr,
         tnr_date: tnr ? (dog?.tnr_date ?? new Date().toISOString().slice(0, 10)) : null,
         vaccinated: vacc,
         vacc_date: vacc ? (dog?.vacc_date ?? new Date().toISOString().slice(0, 10)) : null,
@@ -177,7 +179,18 @@ export default function AddDogDialog({ dog, onClose }: { dog?: Dog | null; onClo
       </Field>
 
       <div data-tour="dog-tnr">
-        <Toggle label={t("tnr_label")} icon="✂️" checked={tnr} onChange={setTnr} />
+        <Toggle
+          label={t("tnr_pending_label")}
+          icon="⏳"
+          checked={pending}
+          onChange={(v) => { setPending(v); if (v) setTnr(false); }}
+        />
+        <Toggle
+          label={t("tnr_label")}
+          icon="✂️"
+          checked={tnr}
+          onChange={(v) => { setTnr(v); if (v) setPending(false); }}
+        />
       </div>
       <Toggle label={t("vacc_label")} icon="💉" checked={vacc} onChange={setVacc} />
       <Toggle label={t("is_injured")} icon="🩹" checked={injured} onChange={setInjured} />

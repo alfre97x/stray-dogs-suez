@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useAppStore, useAuthStore, DOG_SELECT } from "@/lib/store";
 import { useI18n } from "@/lib/i18n";
 import { zoneById } from "@/lib/zones";
+import { Colors } from "@/lib/theme";
 import type { Dog, DogEvent } from "@/lib/types";
 import { Button, Spinner } from "@/components/ui";
 import AddDogDialog from "@/components/AddDogDialog";
@@ -66,6 +67,13 @@ export default function DogDetailPage({ params }: { params: Promise<{ id: string
     }
   };
 
+  const markDeceased = async () => {
+    if (!dog || !confirm(t("confirm_deceased"))) return;
+    await setStatus({ is_deceased: true }, "deceased");
+    removeDog(dog.id); // archived — drops off the active map/list
+    router.push("/dogs");
+  };
+
   if (loading) return <Spinner label={t("loading")} />;
   if (!dog) return <div className="p-8 text-center text-text-tertiary">🐕 {t("no_dogs_found")}</div>;
 
@@ -92,21 +100,45 @@ export default function DogDetailPage({ params }: { params: Promise<{ id: string
         </div>
 
         <div className="flex flex-wrap gap-2 mt-3">
-          {dog.tnr_done && <span className="text-xs px-2 py-1 rounded-full bg-success-bg text-success border border-success-border">✂️ {t("tnr_done")}</span>}
-          {dog.vaccinated && <span className="text-xs px-2 py-1 rounded-full bg-info-bg text-info border border-info-border">💉 {t("vaccinated")}</span>}
+          {dog.is_deceased ? (
+            <span className="text-xs px-2 py-1 rounded-full bg-surface border border-border text-text-secondary">☠️ {t("status_deceased")}</span>
+          ) : dog.tnr_pending && !dog.tnr_done ? (
+            <span className="text-xs px-2 py-1 rounded-full bg-surface border" style={{ color: Colors.pending, borderColor: Colors.pending }}>⏳ {t("status_pending")}</span>
+          ) : dog.tnr_done ? (
+            <span className="text-xs px-2 py-1 rounded-full bg-success-bg text-success border border-success-border">✂️ {dog.vaccinated ? t("status_tnr_vacc") : t("status_tnr_only")}</span>
+          ) : (
+            <span className="text-xs px-2 py-1 rounded-full bg-surface border" style={{ color: Colors.primary, borderColor: Colors.primary }}>{t("status_needs_tnr")}</span>
+          )}
           {dog.is_injured && <span className="text-xs px-2 py-1 rounded-full bg-danger-bg text-danger border border-danger-border">🩹 {t("is_injured")}</span>}
         </div>
 
         {dog.notes && <p className="text-sm text-text-secondary mt-4 whitespace-pre-wrap">{dog.notes}</p>}
 
-        {canEdit && (
+        {canEdit && !dog.is_deceased && (
           <div className="mt-5 flex flex-col gap-2">
-            <div className="flex gap-2">
-              {!dog.tnr_done && <Button variant="secondary" className="flex-1" onClick={() => setStatus({ tnr_done: true }, "tnr_done")}>✂️ {t("mark_tnr")}</Button>}
-              {!dog.vaccinated && <Button variant="secondary" className="flex-1" onClick={() => setStatus({ vaccinated: true }, "vaccinated")}>💉 {t("mark_vaccinated")}</Button>}
-            </div>
+            {!dog.tnr_done && !dog.tnr_pending && (
+              <Button onClick={() => setStatus({ tnr_pending: true }, "catching_started")}>⏳ {t("mark_start_catching")}</Button>
+            )}
+            {dog.tnr_pending && !dog.tnr_done && (
+              <>
+                <Button onClick={() => setStatus({ tnr_done: true, vaccinated: true, tnr_pending: false }, "tnr_returned")}>✅ {t("mark_returned")}</Button>
+                <Button variant="secondary" onClick={() => setStatus({ tnr_pending: false }, "catching_cancelled")}>{t("cancel_catching")}</Button>
+              </>
+            )}
+            {dog.tnr_done && !dog.vaccinated && (
+              <Button variant="secondary" onClick={() => setStatus({ vaccinated: true }, "vaccinated")}>💉 {t("mark_vaccinated")}</Button>
+            )}
+            <Button variant="secondary" onClick={() => setStatus({ is_injured: !dog.is_injured }, dog.is_injured ? "injured_cleared" : "injured")}>
+              🩹 {dog.is_injured ? t("mark_injured_off") : t("mark_injured_on")}
+            </Button>
             <Button variant="secondary" onClick={() => setEditing(true)}>✏️ {t("edit_dog_title")}</Button>
-            <Button variant="danger" onClick={del}>🗑️ {t("delete_dog")}</Button>
+            <Button variant="danger" onClick={markDeceased}>☠️ {t("mark_deceased")}</Button>
+            <Button variant="ghost" onClick={del}>🗑️ {t("delete_dog")}</Button>
+          </div>
+        )}
+        {canEdit && dog.is_deceased && (
+          <div className="mt-5">
+            <Button variant="secondary" onClick={() => setStatus({ is_deceased: false }, "restored")}>↩️ Restore</Button>
           </div>
         )}
 

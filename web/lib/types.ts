@@ -38,6 +38,7 @@ export interface Dog {
   lng: number;
   tnr_done: boolean;
   tnr_date: string | null;
+  tnr_pending: boolean;
   vaccinated: boolean;
   vacc_date: string | null;
   vacc_type: string | null;
@@ -83,6 +84,7 @@ export interface ZoneStat {
   tnr_count: number;
   vaccinated_count: number;
   injured_count: number;
+  pending_count: number;
   recent_sightings: number;
 }
 

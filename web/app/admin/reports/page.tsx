@@ -19,6 +19,7 @@ const COLUMNS: Col[] = [
   { key: "estimated_age", label: "Age", get: (d) => d.estimated_age ?? "" },
   { key: "color", label: "Colour", get: (d) => d.color ?? "" },
   { key: "tnr_done", label: "TNR", get: (d) => (d.tnr_done ? "Yes" : "No") },
+  { key: "tnr_pending", label: "Catching", get: (d) => (d.tnr_pending && !d.tnr_done ? "Yes" : "No") },
   { key: "tnr_date", label: "TNR date", get: (d) => d.tnr_date ?? "" },
   { key: "vaccinated", label: "Vaccinated", get: (d) => (d.vaccinated ? "Yes" : "No") },
   { key: "vacc_date", label: "Vacc date", get: (d) => d.vacc_date ?? "" },
@@ -32,12 +33,13 @@ const COLUMNS: Col[] = [
 
 const DEFAULT_COLS = new Set(["name", "zone", "sex", "tnr_done", "vaccinated", "is_injured", "caught_at", "added_by"]);
 
-type Status = "all" | "all_incl" | "tnr" | "needs_tnr" | "vaccinated" | "not_vaccinated" | "injured" | "deceased";
+type Status = "all" | "all_incl" | "tnr" | "needs_tnr" | "pending" | "vaccinated" | "not_vaccinated" | "injured" | "deceased";
 const STATUS_OPTS: { v: Status; label: string }[] = [
   { v: "all", label: "All (excl. deceased)" },
   { v: "all_incl", label: "All (incl. deceased)" },
   { v: "tnr", label: "TNR done" },
   { v: "needs_tnr", label: "Needs TNR" },
+  { v: "pending", label: "Catching for TNR" },
   { v: "vaccinated", label: "Vaccinated" },
   { v: "not_vaccinated", label: "Not vaccinated" },
   { v: "injured", label: "Injured" },
@@ -49,7 +51,8 @@ function matchStatus(d: Dog, s: Status): boolean {
     case "all": return !d.is_deceased;
     case "all_incl": return true;
     case "tnr": return d.tnr_done && !d.is_deceased;
-    case "needs_tnr": return !d.tnr_done && !d.is_deceased;
+    case "needs_tnr": return !d.tnr_done && !d.tnr_pending && !d.is_deceased;
+    case "pending": return d.tnr_pending && !d.tnr_done && !d.is_deceased;
     case "vaccinated": return d.vaccinated && !d.is_deceased;
     case "not_vaccinated": return !d.vaccinated && !d.is_deceased;
     case "injured": return d.is_injured && !d.is_deceased;

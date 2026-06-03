@@ -9,3 +9,6 @@ build/
 .vercel/
 web/.env*.local
 supabase/.temp/
+.vapid-keys.local.json
+.deploy.local.env
+.secrets.clean.env

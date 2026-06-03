@@ -14,16 +14,19 @@ export default function DogsPage() {
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return dogs.filter((d) => {
-      if (d.is_deceased) return false;
-      if (!needle) return true;
-      const zone = zoneById(d.zone_id);
-      return (
-        (d.name ?? "").toLowerCase().includes(needle) ||
-        (zone?.name_en ?? "").toLowerCase().includes(needle) ||
-        (d.notes ?? "").toLowerCase().includes(needle)
-      );
-    });
+    return dogs
+      .filter((d) => {
+        if (d.is_deceased) return false;
+        if (!needle) return true;
+        const zone = zoneById(d.zone_id);
+        return (
+          (d.name ?? "").toLowerCase().includes(needle) ||
+          (zone?.name_en ?? "").toLowerCase().includes(needle) ||
+          (d.notes ?? "").toLowerCase().includes(needle)
+        );
+      })
+      // Most recent first (chronological).
+      .sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
   }, [dogs, q]);
 
   return (
@@ -55,6 +58,7 @@ export default function DogsPage() {
                     <div className="text-xs text-text-secondary">📍 {zone ? (lang === "ar" ? zone.name_ar : zone.name_en) : d.zone_id}</div>
                   </div>
                   <div className="flex items-center gap-1 text-sm">
+                    {d.tnr_pending && !d.tnr_done && <span>⏳</span>}
                     {d.tnr_done && <span>✂️</span>}
                     {d.vaccinated && <span>💉</span>}
                     {d.is_injured && <span>🩹</span>}
